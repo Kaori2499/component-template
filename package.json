@@ -2,7 +2,10 @@
   "name": "component-template",
   "private": true,
   "version": "0.0.0",
-  "workspaces": ["packages/*", "apps/*"],
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
   "scripts": {
     "dev": "bun run --filter playground dev",
     "build": "bun run --filter @component-template/react build",
@@ -14,5 +17,6 @@
   "devDependencies": {
     "@playwright/test": "^1.49.0",
     "typescript": "^5.7.2"
-  }
+  },
+  "description": "Bun monorepo template for a publishable React component + Vite playground + Playwright e2e"
 }

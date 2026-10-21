@@ -1,55 +1,71 @@
 # component-template
 
-Clean Day-1 monorepo for a **publishable React component** + **playground** + **Playwright e2e**. Inspired by Sonner’s architecture: imperative module store, single mount point, CSS via `data-*`.
+GitHub **template repo** for building and previewing a publishable React component library.
+
+Day-1 layout: one package, one Vite playground, Playwright e2e. Swap the stub `Button` for your component and keep the same tooling.
 
 ```
 component-template/
-├── packages/react/     # @component-template/react (publishes dist/)
-├── apps/playground/    # Vite kitchen sink
-├── e2e/                # Playwright smoke tests
+├── packages/react/     # @component-template/react (publishable stub)
+├── apps/playground/    # Vite preview host
+├── e2e/                # Playwright against the playground
+├── .github/workflows/  # CI: install → build → typecheck → e2e
 └── playwright.config.ts
 ```
-
-## Principles
-
-1. **Imperative API + one mount** — call `toast()` anywhere; render once with `<Toaster />`.
-2. **Module singleton store** — React state is a projection of an Observer (`state.ts`), not Context.
-3. **Tiny public surface** — only what `src/index.ts` exports ships as API.
-4. **CSS owns chrome** — short `styles.css` driven by `data-*` attributes.
-5. **Playground = living matrix** — e2e hits the same app you click through locally.
 
 ## Commands
 
 ```bash
 bun install
-bun run build          # packages/react → dist/
-bun run dev            # playground on http://127.0.0.1:5173
+bun run build          # packages/react → dist/ (ESM + CJS + CSS)
+bun run dev            # playground → http://127.0.0.1:5173
 bun run typecheck
-bun run test:e2e       # Playwright (install browsers once: bunx playwright install chromium)
+bunx playwright install chromium   # once
+bun run test:e2e
 ```
 
-## Package usage
+## Stub usage
 
 ```tsx
-import { toast, Toaster } from "@component-template/react";
+import { Button } from "@component-template/react";
 import "@component-template/react/styles.css";
 
-export function App() {
+export function Example() {
   return (
     <>
-      <button onClick={() => toast.success("Saved")}>Save</button>
-      <Toaster />
+      <Button>Default</Button>
+      <Button variant="primary">Primary</Button>
     </>
   );
 }
 ```
 
-**Next.js App Router:** mount `<Toaster />` inside a Client Component (`"use client"`) — typically in a root layout client boundary. This Vite playground does not need that directive.
+## Replace the component
 
-## Workspaces
+1. **Rename the package** (optional) in `packages/react/package.json` and update the `workspace:*` dependency in `apps/playground/package.json`.
+2. **Replace `packages/react/src/`** — keep a thin `index.ts` public export surface; add files as needed (`component.tsx`, `types.ts`, `styles.css`, …).
+3. **Update the playground** (`apps/playground/src/App.tsx`) to demo your API variants.
+4. **Rewrite e2e** (`e2e/*.spec.ts`) to assert your `data-testid` / roles.
+5. `bun run build && bun run typecheck && bun run test:e2e`
 
-Bun workspaces (`packages/*`, `apps/*`). Playground depends on `@component-template/react` via `workspace:*`.
+For toast / modal / command-palette APIs that need `callFromAnywhere()`, an imperative module store + single mount point is a common pattern — optional, not baked into this stub.
 
-## Publishing
+## Dev loop
 
-Only `packages/react` is meant for npm (`"files": ["dist"]`). Dual ESM/CJS + `.d.ts` via tsup; CSS copied to `dist/styles.css`.
+- **Default:** edit `packages/react/src` → `bun run build` → refresh playground (playground imports `dist`).
+- **Faster iteration:** `bun run --filter @component-template/react dev` (tsup `--watch`) in one terminal, `bun run dev` in another.
+- Alternatively, point Vite at package `src` via an alias if you prefer HMR without rebuilding `dist` — not configured by default to keep the publish path honest.
+
+## Publishing the package
+
+Only `packages/react` is meant for npm (`"files": ["dist"]`). Dual ESM/CJS + `.d.ts` via tsup; CSS exported as `@component-template/react/styles.css`. React stays a peer dependency.
+
+## Use as a GitHub Template
+
+1. Push this repo to GitHub.
+2. **Settings → General → Template repository** (check the box).
+3. Others (or you) use **Use this template** to start a new component library.
+
+## License
+
+MIT — see `LICENSE`.

@@ -3,6 +3,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
-mkdirSync(join(root, "dist"), { recursive: true });
-copyFileSync(join(root, "src", "styles.css"), join(root, "dist", "styles.css"));
-console.log("copied styles.css → dist/");
+const dist = join(root, "dist");
+mkdirSync(dist, { recursive: true });
+copyFileSync(join(root, "src", "styles.css"), join(dist, "styles.css"));
+console.log("copied styles.css -> dist/");

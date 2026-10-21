@@ -1,27 +1,40 @@
-import { toast, Toaster } from "@component-template/react";
+import { useState } from "react";
+import { Button } from "@component-template/react";
 
 export function App() {
+  const [clicks, setClicks] = useState(0);
+
   return (
     <main className="page">
-      <h1>component-template playground</h1>
-      <p>Kitchen sink for the toast API — click through each action.</p>
+      <h1>Component preview</h1>
+      <p className="lede">
+        Playground for <code>@component-template/react</code>. Swap the stub
+        component in <code>packages/react</code>, rebuild, and preview variants
+        here.
+      </p>
 
-      <div className="row">
-        <button type="button" onClick={() => toast("Hello from toast()")}>
-          Default toast
-        </button>
-        <button type="button" onClick={() => toast.success("Saved")}>
-          Success toast
-        </button>
-        <button type="button" onClick={() => toast.error("Something failed")}>
-          Error toast
-        </button>
-        <button type="button" onClick={() => toast.dismiss()}>
-          Dismiss all
-        </button>
-      </div>
-
-      <Toaster />
+      <section className="demo" aria-label="Button variants">
+        <h2>Button</h2>
+        <div className="row">
+          <Button data-testid="button-default">Default</Button>
+          <Button variant="primary" data-testid="button-primary">
+            Primary
+          </Button>
+          <Button disabled data-testid="button-disabled">
+            Disabled
+          </Button>
+          <Button
+            variant="primary"
+            data-testid="button-clickable"
+            onClick={() => setClicks((n) => n + 1)}
+          >
+            Click me
+          </Button>
+        </div>
+        <p data-testid="click-count" className="meta">
+          Clicks: {clicks}
+        </p>
+      </section>
     </main>
   );
 }

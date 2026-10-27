@@ -1,0 +1,71 @@
+# Copy to .github/workflows/pages.yml when the playground is ready to publish.
+# Actions only runs *.yml / *.yaml, so this file does not deploy while it stays an example.
+#
+# Before the first run:
+# - Settings → Pages → Build and deployment → Source: GitHub Actions
+# - Set Vite `base` (and any router basename) to /<repo-name>/
+# - Add "build:playground": "bun run --filter playground build" to the root package.json
+# - Uncomment the registry step once `registry:build` exists
+#
+# Concrete reference (aliases package source, so it skips `bun run build`):
+# https://github.com/Kaori2499/video-player/blob/main/.github/workflows/pages.yml
+#
+# This template's playground imports packages/react dist, so the package build stays.
+
+name: Deploy GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install
+        run: bun install --frozen-lockfile
+
+      # Uncomment when registry:build writes apps/playground/public/r/*.json.
+      # It must run before the playground build so Vite copies public/r into dist.
+      # - name: Build shadcn registry
+      #   run: bun run registry:build
+
+      - name: Build package
+        run: bun run build
+
+      - name: Build playground
+        run: bun run build:playground
+
+      - name: SPA fallback for GitHub Pages
+        run: cp apps/playground/dist/index.html apps/playground/dist/404.html
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: apps/playground/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
